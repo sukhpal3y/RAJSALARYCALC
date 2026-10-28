@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#39276d">
+<title>Rajasthan Govt Salary Calculator</title>
+<style>
+:root{--purple:#39276d;--bg:#fffaff;--panel:#f6f1f8;--border:#99929f;--text:#29252e;--muted:#6e6674;--accent:#eee7f6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:Roboto,"Noto Sans",Arial,sans-serif;color:var(--text)}
+header{background:var(--purple);color:white;padding:19px 17px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:4;box-shadow:0 2px 5px #0002}
+header h1{font-size:23px;font-weight:500;margin:0}
+header button{background:transparent;color:#fff;box-shadow:none;font-size:22px;padding:4px 7px}
+main{max-width:760px;margin:0 auto;padding:14px}
+.section{background:var(--panel);border-radius:17px;padding:18px 14px 8px;margin-bottom:18px;box-shadow:0 2px 3px #0001}
+h2{font-size:19px;margin:0 0 15px;font-weight:700}
+.field{margin:0 0 15px;position:relative}
+label{display:block;font-size:15px;color:#514a57;margin-bottom:7px}
+input,select{display:block;width:100%;min-height:59px;border:1.5px solid var(--border);border-radius:5px;background:transparent;padding:14px 15px;font-size:17px;color:var(--text);outline-color:var(--purple)}
+input.money{padding-right:47px}
+.rupee{position:absolute;right:16px;bottom:16px;font-size:23px;color:#514a57;pointer-events:none}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.actions{display:flex;justify-content:center;gap:15px;margin:23px 0 28px}
+button{border:0;border-radius:28px;padding:13px 28px;font-size:17px;font-weight:600;cursor:pointer;box-shadow:0 2px 3px #0002}
+.primary,.secondary{background:var(--accent);color:var(--purple)}
+.result{background:var(--panel);border-radius:16px;padding:23px 19px;margin-bottom:17px;box-shadow:0 2px 3px #0002;font-size:20px;font-weight:700}
+.result span{font-variant-numeric:tabular-nums}
+.hint{font-size:12px;line-height:1.5;color:var(--muted);margin:-6px 0 14px}
+.hidden{display:none!important}
+.notice{background:#fff7dc;border:1px solid #e6cf84;border-radius:10px;padding:12px;font-size:13px;line-height:1.5;margin-bottom:17px}
+@media(max-width:480px){header h1{font-size:21px}.grid{grid-template-columns:1fr}.section{padding:17px 13px 8px}.result{font-size:19px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Rajasthan Salary Calculator</h1>
+  <div>
+    <button type="button" title="Share" onclick="sharePage()">↗</button>
+    <button type="button" title="About" onclick="showAbout()">ⓘ</button>
+  </div>
+</header>
+<main>
+
+<form id="salaryForm" onsubmit="event.preventDefault();calculate()">
+  <section class="section">
+    <h2>Salary Details</h2>
+    <div class="field">
+      <label for="payLevel">Pay Level</label>
+      <select id="payLevel" required><option value="">Select Pay Level</option></select>
+    </div>
+    <div class="field">
+      <label for="basicPay">Basic Pay</label>
+      <select id="basicPay" required disabled><option value="">पहले Pay Level चुनें</option></select>
+    </div>
+    <div class="field">
+      <label for="da">DA Percentage (%)</label>
+      <input id="da" type="number" min="0" step="0.01" value="0" inputmode="decimal" placeholder="Enter DA percentage">
+      <label for="daAmount">Calculated DA (₹)</label>
+      <input class="money" id="daAmount" type="number" min="0" step="1" value="0" readonly><span class="rupee">₹</span>
+    </div>
+    <div class="field">
+      <label for="houseType">House Type</label>
+      <select id="houseType">
+        <option value="rent">On Rent / किराये का मकान</option>
+        <option value="government">Government Quarter</option>
+      </select>
+    </div>
+    <div class="field" id="hraWrap">
+      <label for="hraPercent">HRA Percentage</label>
+      <select id="hraPercent" required>
+        <option value="">प्रतिशत चुनें</option>
+        <option value="10">10%</option>
+        <option value="20">20%</option>
+        <option value="30">30%</option>
+      </select>
+      <label for="hra">Calculated HRA (₹)</label>
+      <input class="money" id="hra" type="number" min="0" step="1" value="0" readonly><span class="rupee">₹</span>
+    </div>
+    <div class="grid">
+      <div class="field"><label for="washing">Washing Allowance (₹)</label><input class="money" id="washing" type="number" min="0" step="1" value="0" inputmode="decimal"><span class="rupee">₹</span></div>
+      <div class="field"><label for="cca">CCA (₹)</label><input class="money" id="cca" type="number" min="0" step="1" value="0" inputmode="decimal"><span class="rupee">₹</span></div>
+      <div class="field"><label for="allow1">Other Allowance-1 (₹)</label><input class="money" id="allow1" type="number" min="0" step="1" value="0" inputmode="decimal"><span class="rupee">₹</span></div>
+      <div class="field"><label for="allow2">Other Allowance-2 (₹)</label><input class="money" id="allow2" type="number" min="0" step="1" value="0" inputmode="decimal"><span class="rupee">₹</span></div>
+    </div>
+    <div class="field"><label for="allow3">Other Allowance-3 (₹)</label><input class="money" id="allow3" type="number" min="0" step="1" value="0" inputmode="decimal"><span class="rupee">₹</span></div>
+  </section>
+
+  <section class="section">
+    <h2>Deductions</h2>
+    <div class="field"><label for="gpf">GPF (auto-calculated from Basic Pay)</label><input class="money" id="gpf" type="number" min="0" step="1" readonly><span class="rupee">₹</span></div>
+    <div class="hint" id="gpfHint">मूल वेतन के अनुसार SIPF की मासिक subscription slab। <a href="https://sipf.rajasthan.gov.in/GPFSubscriptionSlabs.aspx" target="_blank" rel="noopener">आधिकारिक GPF slab देखें</a></div>
+    <div class="field hidden" id="hfrhWrap">
+      <label for="hfrh">HFRH (₹) — Government Quarter कटौती</label>
+      <input class="money" id="hfrh" type="number" min="0" step="1" value="0" inputmode="decimal" placeholder="HFRH राशि दर्ज करें"><span class="rupee">₹</span>
+    </div>
+    <div class="field"><label for="si">SI Slab</label><select id="si"><option value="">SI Slab चुनें</option></select></div>
+    <div class="field"><label for="lic">LIC (₹) — manually enter</label><input class="money" id="lic" type="number" min="0" step="1" value="0" inputmode="decimal"><span class="rupee">₹</span></div>
+    <div class="field"><label for="rghs">RGHS (auto-calculated)</label><input class="money" id="rghs" type="number" min="0" step="1" readonly><span class="rupee">₹</span></div>
+    <div class="field"><label for="gic">GIC (₹)</label><input class="money" id="gic" type="number" min="0" step="1" value="0" inputmode="decimal"><span class="rupee">₹</span></div>
+    <div class="field"><label for="tax">Income Tax (₹)</label><input class="money" id="tax" type="number" min="0" step="1" value="0" inputmode="decimal"><span class="rupee">₹</span></div>
+    <div class="field"><label for="ded1">Other Deduction-1 (₹)</label><input class="money" id="ded1" type="number" min="0" step="1" value="0" inputmode="decimal"><span class="rupee">₹</span></div>
+    <div class="field"><label for="ded2">Other Deduction-2 (₹)</label><input class="money" id="ded2" type="number" min="0" step="1" value="0" inputmode="decimal"><span class="rupee">₹</span></div>
+    <div class="field"><label for="ded3">Other Deduction-3 (₹)</label><input class="money" id="ded3" type="number" min="0" step="1" value="0" inputmode="decimal"><span class="rupee">₹</span></div>
+  </section>
+  <div class="actions"><button class="primary" type="submit">Calculate</button><button class="secondary" type="button" onclick="resetForm()">Reset</button></div>
+</form>
+<section class="result">Gross Salary: ₹ <span id="gross">—</span></section>
+<section class="result">Deductions: ₹ <span id="deductions">—</span></section>
+<section class="result">Net Salary: ₹ <span id="net">—</span></section>
+</main>
+<script>
+/*
+ CONFIGURATION
+ Rajasthan Pay Matrix and GPF subscription bands are applied automatically.
+ SI amounts are selectable; HRA uses the selected percentage; HFRH is manual.
+*/
+const PAY_MATRIX_STARTS = [
+  17700,17900,18200,19200,20800,21500,22400,26300,28700,33800,37800,44300,
+  53100,56100,60700,67300,71000,75300,79900,88900,123100,129700,145800,148800
+];
+const PAY_MATRIX_CELL_COUNTS = [
+  40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,37,36,34,32,29,18,17,14,14
+];
+const PAY_MATRIX = Object.fromEntries(PAY_MATRIX_STARTS.map((start, index) => {
+  const cells = [start];
+  while (cells.length < PAY_MATRIX_CELL_COUNTS[index]) {
+    cells.push(Math.round(cells[cells.length - 1] * 1.03 / 100) * 100);
+  }
+  return [`L-${index + 1}`, cells];
+}));
+const CONFIG = {
+  // Rajasthan matrix: each cell is the previous cell increased by 3% and rounded to ₹100.
+  PAY_MATRIX,
+  GPF_BANDS: [
+    {max:23100, amount:1450},
+    {max:28500, amount:1625},
+    {max:38500, amount:2100},
+    {max:51500, amount:2850},
+    {max:62000, amount:3575},
+    {max:72000, amount:4200},
+    {max:80000, amount:4800},
+    {max:116000, amount:6150},
+    {max:167000, amount:8900},
+    {max:Infinity, amount:10500}
+  ],
+  SI_SLABS: [
+    {label:"₹800", value:800},
+    {label:"₹1,200", value:1200},
+    {label:"₹2,200", value:2200},
+    {label:"₹3,000", value:3000},
+    {label:"₹5,000", value:5000},
+    {label:"₹7,000", value:7000}
+  ],
+  RGHS_BANDS: [
+    {max:18000, amount:265},
+    {max:33500, amount:440},
+    {max:54000, amount:658},
+    {max:Infinity, amount:875}
+  ]
+};
+const $ = id => document.getElementById(id);
+const num = id => Math.max(0, Number($(id).value) || 0);
+const money = n => Math.round(n).toLocaleString('en-IN');
+function init(){
+  Object.keys(CONFIG.PAY_MATRIX).forEach(level=>{const o=document.createElement('option');o.value=level;o.textContent=level;$('payLevel').appendChild(o)});
+  CONFIG.SI_SLABS.forEach(s=>{const o=document.createElement('option');o.value=s.value;o.textContent=s.label;$('si').appendChild(o)});
+  $('payLevel').addEventListener('change',populateBasic);
+  $('basicPay').addEventListener('change',updateAutoDeductions);
+  $('houseType').addEventListener('change',toggleHouseFields);
+  $('hraPercent').addEventListener('change',updateHra);
+  $('si').addEventListener('change',calculate);
+  ['da','hfrh','washing','cca','allow1','allow2','allow3','lic','gic','tax','ded1','ded2','ded3'].forEach(id=>$(id).addEventListener('input',calculate));
+}
+function populateBasic(){
+  const level=$('payLevel').value, sel=$('basicPay');
+  sel.innerHTML='<option value="">Select Basic Pay</option>';
+  (CONFIG.PAY_MATRIX[level]||[]).forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent='₹ '+money(v);sel.appendChild(o)});
+  sel.disabled=!(CONFIG.PAY_MATRIX[level]||[]).length;
+  updateAutoDeductions();
+}
+function updateAutoDeductions(){
+  const basic=num('basicPay');
+  const gpfBand=CONFIG.GPF_BANDS.find(b=>basic<=b.max);
+  const rghsBand=CONFIG.RGHS_BANDS.find(b=>basic<=b.max);
+  $('gpf').value=gpfBand?gpfBand.amount:0;
+  $('rghs').value=rghsBand?rghsBand.amount:0;
+  updateHra();
+  $('gpfHint').firstChild.textContent=`GPF monthly subscription: ₹${money(num('gpf'))} (SIPF slab). `;
+  calculate();
+}
+function updateHra(){
+  const basic=num('basicPay');
+  const percentage=Number($('hraPercent').value)||0;
+  $('hra').value=Math.round(basic*percentage/100);
+  calculate();
+}
+function toggleHouseFields(){
+  const gov=$('houseType').value==='government';
+  $('hfrhWrap').classList.toggle('hidden',!gov);
+  $('hraWrap').classList.toggle('hidden',gov);
+  $('hraPercent').required=!gov;
+  if(gov)$('hra').value=0;else $('hfrh').value=0;
+  calculate();
+}
+function calculate(){
+  const basic=num('basicPay');
+  const hra=$('houseType').value==='rent'?num('hra'):0;
+  const daAmount=Math.round(basic*num('da')/100);
+  $('daAmount').value=daAmount;
+  const gross=basic+daAmount+hra+num('washing')+num('cca')+num('allow1')+num('allow2')+num('allow3');
+  const siOption=CONFIG.SI_SLABS.find(s=>String(s.value)===$('si').value);
+  const si=siOption?siOption.value:0;
+  const hfrh=$('houseType').value==='government'?num('hfrh'):0;
+  const deductions=num('gpf')+si+hfrh+num('lic')+num('rghs')+num('gic')+num('tax')+num('ded1')+num('ded2')+num('ded3');
+  $('gross').textContent=money(gross);$('deductions').textContent=money(deductions);$('net').textContent=money(gross-deductions);
+}
+function resetForm(){
+  $('salaryForm').reset();
+  $('basicPay').innerHTML='<option value="">पहले Pay Level चुनें</option>';$('basicPay').disabled=true;
+  ['gpf','rghs','hra','hfrh','daAmount'].forEach(id=>$(id).value=0);
+  ['gross','deductions','net'].forEach(id=>$(id).textContent='—');
+  toggleHouseFields();window.scrollTo({top:0,behavior:'smooth'});
+}
+function showAbout(){alert('Rajasthan Govt Salary Calculator\\nPay matrix, GPF, RGHS and SI rates should be checked against current official rules. Sukhpal Singh, Assistant Programmer, Rajasthan Government');}
+async function sharePage(){if(navigator.share){try{await navigator.share({title:document.title,url:location.href})}catch(e){}}else{try{await navigator.clipboard.writeText(location.href);alert('Page link copied')}catch(e){alert('Use your browser Share option to share this page.')}}}
+init();toggleHouseFields();
+</script>
+</body>
+</html>
